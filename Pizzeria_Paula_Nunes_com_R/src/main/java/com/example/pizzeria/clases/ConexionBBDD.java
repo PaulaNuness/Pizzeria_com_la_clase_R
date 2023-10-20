@@ -2,8 +2,10 @@ package com.example.pizzeria.clases;
 
 
 
-import java.io.FileInputStream;
+
 import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.*;
 import java.util.*;
 
@@ -12,10 +14,15 @@ import java.util.*;
  * essa clase foi criada para conectar com a base de datos
  */
 public class ConexionBBDD {
-
-
     private static Connection a;
 
+    /**
+     * metodo utiliza a clase R para ler o fichero pizzeria.properties e fazer a conexao com a base de datos
+     * @return true o false
+     * @throws ClassNotFoundException
+     * @throws SQLException
+     * @throws IOException
+     */
     public static boolean conectar() throws ClassNotFoundException, SQLException, IOException {
         boolean conect=false;
         Properties configuration = new Properties();
@@ -32,9 +39,14 @@ public class ConexionBBDD {
         return conect;
     }
 
+    /**
+     * metodo desconecta a aplicaçao com a base de datos
+     * @throws SQLException
+     */
     public static void desconectar() throws SQLException {
         a.close();
     }
+
     /**
      *metodo que mostrará se esta conectado ou nao
      * @return false ou true
@@ -58,7 +70,6 @@ public class ConexionBBDD {
      * @param y parametro que vai dizer se existe a contraseña na base de datos
      * @return retorna o que houver na variavel existe
      */
-
     public static int usuario_existe(String x, String y) {
         int existe = 0;//nao existe
         try{
@@ -68,12 +79,22 @@ public class ConexionBBDD {
             while(consulta_uno.next()){//enquanto volver linhas para consultar
                 if (consulta_uno.getString("email").equals(x)){//se o que esta na coluna email é igual a x(pasado por parametro)
                     existe=1;//Si el usuario existe
-                    if (consulta_uno.getString("contrasena").equals(y)){//se o que esta na coluna contraseña é igual a y(pasado por parametros)
+                    MessageDigest dig = MessageDigest.getInstance("SHA-256");// Crie uma instância do MessageDigest com o algoritmo SHA-256
+                    dig.reset();// Crie um novo hash para a senha digitada
+                    dig.update(y.getBytes());
+                    byte[] senhaDigitadaHash = dig.digest();
+                    StringBuilder senhaDigitadaHex = new StringBuilder();// Converta o hash da senha digitada em hexadecimal
+                    for (byte b : senhaDigitadaHash) {
+                        senhaDigitadaHex.append(String.format("%02x", b));
+                    }
+                    if (consulta_uno.getString("contrasena").equals(senhaDigitadaHex.toString())){//se o que esta na coluna contraseña é igual a y(pasado por parametros)
                         existe=2;//Si el usuario existe y la contraseña coincide
                     }
                 }
             }
         }catch (SQLException e) {
+            throw new RuntimeException(e);
+        } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
         return existe;
@@ -194,7 +215,7 @@ public class ConexionBBDD {
 
     }
 
-    /**
+    /**metodo obtenho os pedidos da tabla pedidos na base de datos
      * @return
      * @throws SQLException
      */
@@ -248,6 +269,42 @@ public class ConexionBBDD {
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
+    }
+
+    /**
+     * metodo verifica se ja existe o email que passei por parametro
+     * @param x
+     * @return
+     */
+    public static boolean usuario_em_la_base_de_datos(String x) {
+        boolean existe = false;//nao existe
+        try {
+            Statement s = a.createStatement();
+            ResultSet consulta_uno = s.executeQuery("Select * from usuarios;");//busca tudo que ha na tabela usuarios
+
+            while (consulta_uno.next()) {//enquanto volver linhas para consultar
+                if (consulta_uno.getString("email").equals(x)) {//se o que esta na coluna email é igual a x(pasado por parametro)
+                    existe = true;//Si el usuario existe
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+
+        }
+        return existe;
+    }
+
+    /**
+     * metodo elimina da base de datos usuarios que ja tenham o mesmo email
+     * @param email
+     * @throws SQLException
+     */
+    public static void eliminar_usuario(String email) throws SQLException {
+        String sql = "DELETE FROM usuarios WHERE email = ?";
+
+        PreparedStatement sentencia = a.prepareStatement(sql);
+        sentencia.setString(1, email);
+        sentencia.executeUpdate();
     }
 
 

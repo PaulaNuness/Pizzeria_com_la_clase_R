@@ -34,9 +34,6 @@ public class PizzeriaApplication extends Application {
      * @param args Ele permite que você passe argumentos da linha de comando para o programa quando você o executa
      */
     public static void main(String[] args) throws SQLException, IOException, ClassNotFoundException {
-        System.out.println("Está conectado? "+ConexionBBDD.conectar());
-        System.out.println("Cual es el ID del usuario paula? "+ConexionBBDD.obtenerIDUsuario("paula@hotmail.com"));
-        System.out.println("Cual es el ID del ultimo usuario? "+ConexionBBDD.obtenerultimoIDUsuario());
         launch();
     }
 }

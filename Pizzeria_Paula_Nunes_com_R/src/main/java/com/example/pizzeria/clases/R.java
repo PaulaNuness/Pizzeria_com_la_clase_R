@@ -10,6 +10,11 @@ public class R {
         return Thread.currentThread().getContextClassLoader().getResourceAsStream("images" + File.separator + name);
     }
 
+    /**
+     * metodo para obtener as informacoes que tenho no fichero pizzeria.properties
+     * @param name
+     * @return
+     */
     public static InputStream getProperties(String name) {
         return Thread.currentThread().getContextClassLoader().getResourceAsStream(name );
     }

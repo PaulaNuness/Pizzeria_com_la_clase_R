@@ -63,7 +63,7 @@ public class Inicio_Controller  {
                         alert.setContentText("La contraseña introducida es erronea.");
                         alert.showAndWait();
                     } else if (ConexionBBDD.usuario_existe(texto_usuario.getText(), texto_contraseña.getText()) == 2) {
-                        if(texto_usuario.getText().equals("admin")){
+                        if(texto_usuario.getText().equals("admin@hotmail.com")){
                             FXMLLoader fxmlLoader = new FXMLLoader(PizzeriaApplication.class.getResource("pantalla_admin.fxml"));//quando eu clicar en entrar, iremos para a ventana seguinte
                             Parent root = fxmlLoader.load();
                             Pantalla_Admin_Controller controlador2 = fxmlLoader.getController();
